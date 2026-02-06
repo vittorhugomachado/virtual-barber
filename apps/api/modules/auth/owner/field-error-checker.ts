@@ -1,19 +1,11 @@
-interface AccountDataBody {
-    restaurantName: string;
-    cnpj?: string;
-    ownersName: string;
-    cpf: string;
-    phoneNumber: string;
-    email: string;
-    password: string;
-};
+import { OwnerUserData } from "../../../types/user-types";
 
-export const signUpFieldsErrorChecker = (body: AccountDataBody): string | null => {
+export const signUpFieldsErrorChecker = (body: OwnerUserData): string | null => {
     
-    const requiredFields = ['restaurantName', 'ownersName', 'cpf', 'phoneNumber', 'email', 'password'];
+    const requiredFields = ['barbershopName', 'ownerUser', 'cpf', 'phoneNumber', 'email', 'password'];
 
     for (const field of requiredFields) {
-        if (!body[field as keyof AccountDataBody]) {
+        if (!body[field as keyof OwnerUserData]) {
             return 'Campos obrigatórios';
         }
     }

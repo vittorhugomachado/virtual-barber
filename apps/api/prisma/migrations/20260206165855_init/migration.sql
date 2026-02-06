@@ -104,6 +104,7 @@ CREATE TABLE "appointments" (
     "barberUserId" INTEGER,
     "status" "AppointmentStatus" NOT NULL DEFAULT 'agendado',
     "date" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "appointments_pkey" PRIMARY KEY ("id")
 );
