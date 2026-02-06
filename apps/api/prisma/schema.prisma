@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/pris"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model OwnerUser {
+  id                  Int                  @id @default(autoincrement())
+  email               String               @unique
+  password            String
+  createdAt           DateTime             @default(now())
+  cnpj                String?
+  cpf                 String
+  refreshToken        String?
+  barberShop          BarberShop?
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("owner_users")
+}
+
+model BarberUser {
+  id           Int           @id @default(autoincrement())
+  userName     String        @unique
+  phoneNumber  String
+  password     String
+  createdAt    DateTime      @default(now())
+  barberShop   BarberShop?   @relation(fields: [barberShopId], references: [id])
+  barberShopId Int?
+  appointments Appointment[]
+
+  @@map("barber_users")
+}
+
+model CustomerUser {
+  id                  Int                  @id @default(autoincrement())
+  userName            String
+  phoneNumber         String               @unique
+  createdAt           DateTime             @default(now())
+  appointments        Appointment[]
+  passwordResetTokens PasswordResetToken[]
+  barberShop          BarberShop?          @relation(fields: [barberShopId], references: [id])
+  barberShopId        Int?
+
+  @@map("customer_users")
+}
+
+model BarberShop {
+  id             Int            @id @default(autoincrement())
+  userId         Int            @unique
+  user           OwnerUser      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  barbershopName String?
+  slug           String
+  phoneNumber    String?
+  address        String?
+  logoUrl        String?
+  bannerUrl      String?
+  isActive       Boolean        @default(true)
+  services       Service[]
+  openingHours   OpeningHour[]
+  appointments   Appointment[]
+  customerUsers  CustomerUser[]
+  barberUsers    BarberUser[]
+
+  @@map("barbershops")
+}
+
+model OpeningHour {
+  barbershopId Int
+  barbershop   BarberShop @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+  day          WeekDay
+  isOpen       Boolean    @default(false)
+  timeRanges   Json?
+
+  @@id([barbershopId, day])
+  @@map("opening_hours")
+}
+
+model PasswordResetToken {
+  id             Int           @id @default(autoincrement())
+  token          String        @unique
+  userId         Int
+  user           OwnerUser     @relation(fields: [userId], references: [id])
+  expiresAt      DateTime
+  createdAt      DateTime      @default(now())
+  customerUser   CustomerUser? @relation(fields: [customerUserId], references: [id])
+  customerUserId Int?
+
+  @@map("password_reset_tokens")
+}
+
+model Service {
+  id           Int           @id @default(autoincrement())
+  name         String        @db.VarChar(100)
+  image        String?
+  barbershopId Int
+  barbershop   BarberShop    @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
+  description  String?
+  duration     Int
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+  isActive     Boolean       @default(true)
+
+  @@map("services")
+}
+
+model Appointment {
+  id             Int               @id @default(autoincrement())
+  barberShop     BarberShop        @relation(fields: [barberShopId], references: [id], map: "fk_appointment_barbershop")
+  barberShopId   Int
+  customerUserId Int
+  customerUser   CustomerUser      @relation(fields: [customerUserId], references: [id])
+  serviceId      Int
+  service        Service           @relation(fields: [serviceId], references: [id])
+  notes          String?
+  barberUser     BarberUser?       @relation(fields: [barberUserId], references: [id])
+  barberUserId   Int?
+  status         AppointmentStatus @default(agendado)
+  date           DateTime
+  createdAt      DateTime          @default(now())
+
+  @@map("appointments")
+}
+
+enum WeekDay {
+  segunda
+  terca
+  quarta
+  quinta
+  sexta
+  sabado
+  domingo
+}
+
+enum PaymentMethod {
+  dinheiro
+  cartao
+  pix
+}
+
+enum AppointmentStatus {
+  agendado
+  finalizado
+  cancelado_pelo_cliente
+  cancelado_pela_barbearia
+}
