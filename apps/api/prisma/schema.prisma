@@ -11,23 +11,27 @@ model OwnerUser {
   email               String               @unique
   password            String
   createdAt           DateTime             @default(now())
-  cnpj                String?
-  cpf                 String
+  updatedAt           DateTime?            @updatedAt
+  cnpj                String?              @db.Char(14)
+  cpf                 String?              @db.Char(11)
   refreshToken        String?
   barberShop          BarberShop?
   passwordResetTokens PasswordResetToken[]
 
+  @@index([cpf])
+  @@index([cnpj])
+  @@index([createdAt])
   @@map("owner_users")
 }
 
 model BarberUser {
   id           Int           @id @default(autoincrement())
   userName     String        @unique
-  phoneNumber  Int
+  phoneNumber  BigInt?
   password     String
   createdAt    DateTime      @default(now())
   barberShop   BarberShop?   @relation(fields: [barberShopId], references: [id])
-  barberShopId Int?
+  barberShopId Int
   appointments Appointment[]
 
   @@map("barber_users")
@@ -36,7 +40,7 @@ model BarberUser {
 model CustomerUser {
   id                  Int                  @id @default(autoincrement())
   userName            String
-  phoneNumber         String               @unique
+  phoneNumber         BigInt               @unique
   createdAt           DateTime             @default(now())
   appointments        Appointment[]
   passwordResetTokens PasswordResetToken[]
@@ -47,22 +51,27 @@ model CustomerUser {
 }
 
 model BarberShop {
-  id             Int            @id @default(autoincrement())
-  userId         Int            @unique
-  user           OwnerUser      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             Int       @id @default(autoincrement())
+  userId         Int       @unique
+  user           OwnerUser @relation(fields: [userId], references: [id], onDelete: Cascade)
   barbershopName String?
   slug           String
-  phoneNumber    String?
+  phoneNumber    BigInt?   @unique
   address        String?
   logoUrl        String?
   bannerUrl      String?
-  isActive       Boolean        @default(true)
-  services       Service[]
-  openingHours   OpeningHour[]
-  appointments   Appointment[]
-  customerUsers  CustomerUser[]
-  barberUsers    BarberUser[]
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime?  @updatedAt
 
+  services      Service[]
+  openingHours  OpeningHour[]
+  appointments  Appointment[]
+  customerUsers CustomerUser[]
+  barberUsers   BarberUser[]
+
+  @@index([isActive])
+  @@index([createdAt])
   @@map("barbershops")
 }
 
