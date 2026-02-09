@@ -23,7 +23,7 @@ model OwnerUser {
 model BarberUser {
   id           Int           @id @default(autoincrement())
   userName     String        @unique
-  phoneNumber  String
+  phoneNumber  Int
   password     String
   createdAt    DateTime      @default(now())
   barberShop   BarberShop?   @relation(fields: [barberShopId], references: [id])
