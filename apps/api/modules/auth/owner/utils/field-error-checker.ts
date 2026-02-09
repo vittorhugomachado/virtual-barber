@@ -1,7 +1,6 @@
-import { OwnerUserData } from "../../../types/user-types";
+import { OwnerUserData } from '../../../../types/user-types';
 
 export const signUpFieldsErrorChecker = (body: OwnerUserData): string | null => {
-    
     const requiredFields = ['barbershopName', 'ownerUser', 'cpf', 'phoneNumber', 'email', 'password'];
 
     for (const field of requiredFields) {
@@ -13,8 +12,7 @@ export const signUpFieldsErrorChecker = (body: OwnerUserData): string | null => 
     return null;
 };
 
-export const loginFieldsErrorChecker = (body: AccountDataBody): string | null => {
-
+export const loginFieldsErrorChecker = (body: OwnerUserData): string | null => {
     const { email, password } = body;
 
     if (!email || !password) {
