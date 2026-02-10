@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { signUpService, loginService, refreshTokenService } from './auth.services';
+import { signUpService, loginService, refreshTokenService, logoutService } from './auth.services';
 import { signUpFieldsErrorChecker, loginFieldsErrorChecker } from './utils/field-error-checker';
 import { handleControllerError } from '../../../utils/errors';
 
@@ -75,7 +75,7 @@ export const refreshAccessToken = async (req: Request, res: Response): Promise<v
             sameSite: 'strict',
             maxAge: 24 * 60 * 60 * 1000, // 1 dia
         });
-        
+
         res.cookie('refreshToken', newRefreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -90,26 +90,26 @@ export const refreshAccessToken = async (req: Request, res: Response): Promise<v
     }
 };
 
-// export const logout = async (req: Request & { user?: any }, res: Response): Promise<void> => {
+export const logout = async (req: Request & { user?: { userId: number } }, res: Response): Promise<void> => {
 
-//     try {
+    try {
 
-//         const userId = req.user?.userId;
-//         if (!userId) {
-//             res.status(401).json({ message: 'Usuário não autenticado' });
-//             return
-//         }
+        const userId = req.user?.userId;
+        if (!userId) {
+            res.status(401).json({ message: 'Usuário não autenticado' });
+            return
+        }
 
-//         await logoutService(userId);
+        await logoutService(userId);
 
-//         res.clearCookie('token');
-//         res.clearCookie('refreshToken');
-//         res.status(200).json({ message: 'Logout efetuado com sucesso' });
-//         return
+        res.clearCookie('token');
+        res.clearCookie('refreshToken');
+        res.status(200).json({ message: 'Logout efetuado com sucesso' });
+        return
 
-//     } catch (error) {
+    } catch (error) {
 
-//         handleControllerError(res, error);
+        handleControllerError(res, error);
 
-//     }
-// };
+    }
+};

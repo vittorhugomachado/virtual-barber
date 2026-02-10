@@ -107,9 +107,9 @@ export const refreshTokenService = async (refreshToken: string) => {
     return { accessToken, refreshToken: newRefreshToken };
 };
 
-// export const logoutService = async (userId: number) => {
-//   await prisma.user.update({
-//     where: { id: userId },
-//     data: { refreshToken: null },
-//   });
-// };
+export const logoutService = async (userId: number) => {
+    await prisma.ownerUser.update({
+        where: { id: userId },
+        data: { refreshToken: null },
+    });
+};
