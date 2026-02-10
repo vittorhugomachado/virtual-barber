@@ -1,4 +1,4 @@
-// import jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { LoginData, SignUpData } from './types/auth-types';
 import { prisma } from '../../../lib/prisma';
@@ -6,9 +6,6 @@ import { WeekDay } from '@prisma/client';
 import { stripNonDigits } from '../../../utils/stripFormating';
 import { ConflictError, UnauthorizedError } from '../../../utils/errors';
 import { generateTokens } from './utils/auth-generate-token';
-
-// const JWT_SECRET = process.env.JWT_SECRET || 'jwt_secret_default';
-// const REFRESH_SECRET = process.env.REFRESH_SECRET || 'jwt_refresh_secret_default';
 
 export const signUpService = async (data: SignUpData) => {
     const { barbershopName, phoneNumber, email, password } = data;
@@ -86,29 +83,29 @@ export const loginService = async (data: LoginData) => {
     return { accessToken, refreshToken };
 };
 
-// export const refreshTokenService = async (refreshToken: string) => {
-//   const payload = jwt.verify(refreshToken, REFRESH_SECRET) as any;
+export const refreshTokenService = async (refreshToken: string) => {
+    const REFRESH_SECRET = process.env.REFRESH_SECRET || 'jwt_refresh_secret_default';
 
-//   const user = await prisma.user.findUnique({
-//     where: { id: payload.userId },
-//   });
+    const payload = jwt.verify(refreshToken, REFRESH_SECRET) as { userId: number };
 
-//   if (!user || user.refreshToken !== refreshToken) {
-//     throw new UnauthorizedError(
-//       "Registro não encontrado através do token fornecido",
-//     );
-//   }
+    const user = await prisma.ownerUser.findUnique({
+        where: { id: payload.userId },
+    });
 
-//   const newAccessToken = jwt.sign(
-//     {
-//       userId: user.id,
-//     },
-//     JWT_SECRET,
-//     { expiresIn: "1d" },
-//   );
+    if (!user || user.refreshToken !== refreshToken) {
+        throw new UnauthorizedError('Token inválido ou expirado');
+    }
 
-//   return newAccessToken;
-// };
+    const newPayload = { userId: user.id };
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens(newPayload);
+
+    await prisma.ownerUser.update({
+        where: { id: user.id },
+        data: { refreshToken: newRefreshToken },
+    });
+
+    return { accessToken, refreshToken: newRefreshToken };
+};
 
 // export const logoutService = async (userId: number) => {
 //   await prisma.user.update({

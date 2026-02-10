@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authLimiter } from './middlewares/auth-limiter.middleware';
 // import { authenticateToken } from '../../../middlewares/authenticate-token.middleware';
-import { signUp, login } from './auth.controller';
+import { signUp, login, refreshAccessToken } from './auth.controller';
 
 const router = Router();
 
@@ -9,7 +9,7 @@ router.post('/signup', signUp);
 
 router.post('/login', authLimiter, login);
 
-// router.post('/refresh-token', refreshAccessToken);
+router.post('/refresh-token', refreshAccessToken);
 
 // router.post('/logout', authenticateToken, logout);
 
