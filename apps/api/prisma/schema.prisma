@@ -28,7 +28,7 @@ model OwnerUser {
 model BarberUser {
   id                  Int                  @id @default(autoincrement())
   userName            String               @unique
-  phoneNumber         BigInt?
+  phoneNumber         BigInt?              @unique
   password            String
   createdAt           DateTime             @default(now())
   barberShop          BarberShop?          @relation(fields: [barberShopId], references: [id])
@@ -88,16 +88,16 @@ model OpeningHour {
 }
 
 model PasswordResetToken {
-  id           Int         @id @default(autoincrement())
-  token        String      @unique
-  userType     UserType  
-  ownerId      Int?
-  owner        OwnerUser?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  barberId     Int?
-  barber       BarberUser? @relation(fields: [barberId], references: [id], onDelete: Cascade)
-  expiresAt    DateTime
-  createdAt    DateTime    @default(now())
-  usedAt       DateTime?   
+  id        Int         @id @default(autoincrement())
+  token     String      @unique
+  userType  UserType
+  ownerId   Int?
+  owner     OwnerUser?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  barberId  Int?
+  barber    BarberUser? @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime    @default(now())
+  usedAt    DateTime?
 
   @@index([token])
   @@index([expiresAt])
