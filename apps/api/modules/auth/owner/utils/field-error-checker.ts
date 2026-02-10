@@ -1,4 +1,4 @@
-import { SignUpData } from '../types/auth-types';
+import { LoginData, SignUpData } from '../types/auth-types';
 import { stripNonDigits } from '../../../../utils/stripFormating';
 
 export const signUpFieldsErrorChecker = (body: SignUpData): string | null => {
@@ -57,22 +57,22 @@ export const signUpFieldsErrorChecker = (body: SignUpData): string | null => {
     return null;
 };
 
-// export const loginFieldsErrorChecker = (body: OwnerUser): string | null => {
-//     const { email, password } = body;
+export const loginFieldsErrorChecker = (body: LoginData): string | null => {
+    const { email, password } = body;
 
-//     if (!email || !password) {
-//         return 'Campos obrigatórios';
-//     }
+    if (!email || !password) {
+        return 'Campos obrigatórios';
+    }
 
-//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-//     if (!emailRegex.test(email)) {
-//         return 'Email inválido';
-//     }
+    if (!emailRegex.test(email)) {
+        return 'Email inválido';
+    }
 
-//     if (password.length < 6) {
-//         return 'Senha muito curta';
-//     }
+    if (password.length < 6) {
+        return 'Senha muito curta';
+    }
 
-//     return null;
-// };
+    return null;
+};

@@ -1,11 +1,11 @@
 // import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { SignUpData } from './types/auth-types';
+import { LoginData, SignUpData } from './types/auth-types';
 import { prisma } from '../../../lib/prisma';
 import { WeekDay } from '@prisma/client';
 import { stripNonDigits } from '../../../utils/stripFormating';
-// import { generateTokens } from './utils/auth-generate-token';
-import { ConflictError } from '../../../utils/errors';
+import { ConflictError, UnauthorizedError } from '../../../utils/errors';
+import { generateTokens } from './utils/auth-generate-token';
 
 // const JWT_SECRET = process.env.JWT_SECRET || 'jwt_secret_default';
 // const REFRESH_SECRET = process.env.REFRESH_SECRET || 'jwt_refresh_secret_default';
@@ -34,7 +34,7 @@ export const signUpService = async (data: SignUpData) => {
         const barberShop = await tx.barberShop.create({
             data: {
                 barbershopName: barbershopName,
-                slug: slugBase + "-" + ownerUser.id + 'vb2304' + ownerUser.id,
+                slug: slugBase + '-' + ownerUser.id + 'vb2304' + ownerUser.id,
                 phoneNumber: BigInt(rawPhoneNumber),
                 user: {
                     connect: { id: ownerUser.id },
@@ -59,32 +59,32 @@ export const signUpService = async (data: SignUpData) => {
     return result;
 };
 
-// export const loginService = async (data: AccountData) => {
-//   const { email, password } = data;
+export const loginService = async (data: LoginData) => {
+    const { email, password } = data;
 
-//   const user = await prisma.user.findUnique({ where: { email } });
-//   if (!user) {
-//     throw new UnauthorizedError("Email ou senha inválidos");
-//   }
+    const user = await prisma.ownerUser.findUnique({ where: { email } });
+    if (!user) {
+        throw new UnauthorizedError('Email ou senha inválidos');
+    }
 
-//   const passwordMatch = await bcrypt.compare(password, user.password);
-//   if (!passwordMatch) {
-//     throw new UnauthorizedError("Email ou senha inválidos");
-//   }
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+        throw new UnauthorizedError('Email ou senha inválidos');
+    }
 
-//   const payload = {
-//     userId: user.id,
-//   };
+    const payload = {
+        userId: user.id,
+    };
 
-//   const { accessToken, refreshToken } = generateTokens(payload);
+    const { accessToken, refreshToken } = generateTokens(payload);
 
-//   await prisma.user.update({
-//     where: { id: user.id },
-//     data: { refreshToken },
-//   });
+    await prisma.ownerUser.update({
+        where: { id: user.id },
+        data: { refreshToken },
+    });
 
-//   return { accessToken, refreshToken };
-// };
+    return { accessToken, refreshToken };
+};
 
 // export const refreshTokenService = async (refreshToken: string) => {
 //   const payload = jwt.verify(refreshToken, REFRESH_SECRET) as any;

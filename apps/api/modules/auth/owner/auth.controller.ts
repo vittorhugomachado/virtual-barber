@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { signUpFieldsErrorChecker } from './utils/field-error-checker';
+import { signUpFieldsErrorChecker, loginFieldsErrorChecker } from './utils/field-error-checker';
 import { handleControllerError } from '../../../utils/errors';
-import { signUpService } from './auth.services';
+import { signUpService, loginService } from './auth.services';
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -26,43 +26,38 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-// export const login = async (req: Request, res: Response): Promise<void> => {
+export const login = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const validationError = loginFieldsErrorChecker(req.body);
+        if (validationError) {
+            res.status(400).json({ message: validationError });
+            return;
+        }
 
-//     try {
+        const { accessToken, refreshToken } = await loginService(req.body);
 
-//         const validationError = loginFieldsErrorChecker(req.body);
-//         if (validationError) {
-//             res.status(400).json({ message: validationError });
-//             return
-//         }
+        res.cookie('token', accessToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            path: '/',
+            maxAge: 24 * 60 * 60 * 1000, //1 DIA
+        });
 
-//         const { accessToken, refreshToken } = await loginService(req.body);
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            path: '/',
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
+        });
 
-//         res.cookie('token', accessToken, {
-//             httpOnly: true,
-//             secure: true,
-//             sameSite: 'none',
-//             path: '/',
-//             maxAge: 24 * 60 * 60 * 1000, //1 DIA
-//         });
-
-//         res.cookie('refreshToken', refreshToken, {
-//             httpOnly: true,
-//             secure: true,
-//             sameSite: 'none',
-//             path: '/',
-//             maxAge: 30 * 24 * 60 * 60 * 1000, // 30 dias
-//         });
-
-//         res.status(200).json({ message: 'Login realizado com sucesso' });
-//         return
-
-//     } catch (error: any) {
-
-//         handleControllerError(res, error);
-
-//     }
-// };
+        res.status(200).json({ message: 'Login realizado com sucesso' });
+        return;
+    } catch (error) {
+        handleControllerError(res, error);
+    }
+};
 
 // export const refreshAccessToken = async (req: Request, res: Response): Promise<void> => {
 
