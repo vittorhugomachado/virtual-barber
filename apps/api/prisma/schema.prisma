@@ -7,7 +7,6 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model OwnerUser {
   id                  Int                  @id @default(autoincrement())
   email               String               @unique
@@ -27,27 +26,27 @@ model OwnerUser {
 }
 
 model BarberUser {
-  id           Int           @id @default(autoincrement())
-  userName     String        @unique
-  phoneNumber  BigInt?
-  password     String
-  createdAt    DateTime      @default(now())
-  barberShop   BarberShop?   @relation(fields: [barberShopId], references: [id])
-  barberShopId Int
-  appointments Appointment[]
+  id                  Int                  @id @default(autoincrement())
+  userName            String               @unique
+  phoneNumber         BigInt?
+  password            String
+  createdAt           DateTime             @default(now())
+  barberShop          BarberShop?          @relation(fields: [barberShopId], references: [id])
+  barberShopId        Int
+  appointments        Appointment[]
+  passwordResetTokens PasswordResetToken[]
 
   @@map("barber_users")
 }
 
 model CustomerUser {
-  id                  Int                  @id @default(autoincrement())
-  userName            String
-  phoneNumber         BigInt               @unique
-  createdAt           DateTime             @default(now())
-  appointments        Appointment[]
-  passwordResetTokens PasswordResetToken[]
-  barberShop          BarberShop?          @relation(fields: [barberShopId], references: [id])
-  barberShopId        Int?
+  id           Int           @id @default(autoincrement())
+  userName     String
+  phoneNumber  BigInt        @unique
+  createdAt    DateTime      @default(now())
+  appointments Appointment[]
+  barberShop   BarberShop?   @relation(fields: [barberShopId], references: [id])
+  barberShopId Int?
 
   @@map("customer_users")
 }
@@ -64,7 +63,7 @@ model BarberShop {
   bannerUrl      String?
   isActive       Boolean   @default(true)
   createdAt      DateTime  @default(now())
-  updatedAt      DateTime?  @updatedAt
+  updatedAt      DateTime? @updatedAt
 
   services      Service[]
   openingHours  OpeningHour[]
@@ -89,15 +88,19 @@ model OpeningHour {
 }
 
 model PasswordResetToken {
-  id             Int           @id @default(autoincrement())
-  token          String        @unique
-  userId         Int
-  user           OwnerUser     @relation(fields: [userId], references: [id])
-  expiresAt      DateTime
-  createdAt      DateTime      @default(now())
-  customerUser   CustomerUser? @relation(fields: [customerUserId], references: [id])
-  customerUserId Int?
+  id           Int         @id @default(autoincrement())
+  token        String      @unique
+  userType     UserType  
+  ownerId      Int?
+  owner        OwnerUser?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  barberId     Int?
+  barber       BarberUser? @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  expiresAt    DateTime
+  createdAt    DateTime    @default(now())
+  usedAt       DateTime?   
 
+  @@index([token])
+  @@index([expiresAt])
   @@map("password_reset_tokens")
 }
 
@@ -132,6 +135,11 @@ model Appointment {
   createdAt      DateTime          @default(now())
 
   @@map("appointments")
+}
+
+enum UserType {
+  owner
+  barber
 }
 
 enum WeekDay {
