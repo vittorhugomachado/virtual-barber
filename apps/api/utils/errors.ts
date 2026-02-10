@@ -63,28 +63,39 @@ const handledErrors = [
 
 ];
 
-export function handleControllerError(res: Response, error: any) {
+export function handleControllerError(res: Response, error: unknown): void {
     console.error('Erro no controller:', error);
-
-    const matchedError = handledErrors.find(ErrorClass => error instanceof ErrorClass);
 
     const MAX_ERROR_MSG_LENGTH = 150;
     const defaultMsg = "Erro interno no servidor";
 
-    let message = error.message || defaultMsg;
-    if (typeof message === "string" && message.length > MAX_ERROR_MSG_LENGTH) {
+    let message = defaultMsg;
+    
+    if (error instanceof Error) {
+        message = error.message;
+    } else if (typeof error === 'string') {
+        message = error;
+    } else if (error && typeof error === 'object' && 'message' in error) {
+        message = String((error as { message: unknown }).message);
+    }
+
+    if (message.length > MAX_ERROR_MSG_LENGTH) {
         message = defaultMsg;
     }
 
-    if (matchedError) {
-        return res.status(error.statusCode).json({
-            success: false,
-            message
-        });
+    let statusCode = 500;
+    
+    for (const ErrorClass of handledErrors) {
+        if (error instanceof ErrorClass) {
+            if ('statusCode' in error && typeof error.statusCode === 'number') {
+                statusCode = error.statusCode;
+            }
+            break;
+        }
     }
 
-    return res.status(500).json({
+    res.status(statusCode).json({
         success: false,
         message
     });
-};
+}

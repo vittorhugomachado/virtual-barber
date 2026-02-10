@@ -94,13 +94,6 @@ paths:
       summary: Atualizar token de acesso
       description: >
         Essa rota exige o cookie `refreshToken` presente na requisição. Ela retorna um novo access token no cookie `token`.
-      parameters:
-        - in: cookie
-          name: refreshToken
-          schema:
-            type: string
-          required: true
-          description: Token de atualização armazenado em cookie.
       responses:
         '200':
           description: Token renovado com sucesso
@@ -112,7 +105,7 @@ paths:
   /api/owner-user/logout:
     post:
       tags:
-        - Auth
+        - Auth Owner User
       summary: Sair da conta
       security:
         - bearerAuth: []
