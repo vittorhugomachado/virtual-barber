@@ -1,72 +1,62 @@
-import jwt from 'jsonwebtoken';
+// import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { OwnerUserData } from '../../../types/user-types';
+import { SignUpData } from './types/auth-types';
 import { prisma } from '../../../lib/prisma';
-import { WeekDay } from '../../../generated/pris/enums';
+import { WeekDay } from '@prisma/client';
 import { stripNonDigits } from '../../../utils/stripFormating';
-import { generateTokens } from './utils/auth-generate-token';
-import { ConflictError, UnauthorizedError, ValidationError } from '../../../utils/errors';
+// import { generateTokens } from './utils/auth-generate-token';
+import { ConflictError } from '../../../utils/errors';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'jwt_secret_default';
-const REFRESH_SECRET = process.env.REFRESH_SECRET || 'jwt_refresh_secret_default';
+// const JWT_SECRET = process.env.JWT_SECRET || 'jwt_secret_default';
+// const REFRESH_SECRET = process.env.REFRESH_SECRET || 'jwt_refresh_secret_default';
 
-export const signUpService = async (data: OwnerUserData) => {
-    const { barberShopName, cpf, cnpj, phoneNumber, email, password, slug } = data;
-
-    const rawCpf = stripNonDigits(cpf);
-    const rawCnpj = cnpj ? stripNonDigits(cnpj) : null;
+export const signUpService = async (data: SignUpData) => {
+    const { barbershopName, phoneNumber, email, password } = data;
     const rawPhoneNumber = stripNonDigits(phoneNumber);
+    const slugBase = barbershopName.toLowerCase().replace(/\s+/g, '-');
 
-    if (!email.includes('@')) throw new ValidationError('Email inválido');
-    if (rawCpf.length !== 11) throw new ValidationError('CPF inválido');
-    if (cnpj && rawCnpj && rawCnpj.length !== 14) throw new ValidationError('CNPJ inválido');
-    if (password.length < 8) throw new ValidationError('Senha fraca');
-    if (password.length > 72) throw new ValidationError('Senha muito longa');
-    if (!/[A-Z]/.test(password)) throw new ValidationError('Senha sem letra maiúscula');
-    if (!/[0-9]/.test(password)) throw new ValidationError('Senha sem número');
+    const emailInUse = await prisma.ownerUser.findUnique({ where: { email } });
+    if (emailInUse) throw new ConflictError('Email já cadastrado');
 
-    const existingUser = await prisma.ownerUser.findUnique({ where: { email } });
-    if (existingUser) throw new ConflictError('Email já cadastrado');
+    const phoneNumberInUse = await prisma.barberShop.findUnique({ where: { phoneNumber: BigInt(rawPhoneNumber) } });
+    if (phoneNumberInUse) throw new ConflictError('Celular já cadastrado');
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await prisma.$transaction(async (prisma: any) => {
-        const ownerUser = await prisma.ownerUser.create({
+    const result = await prisma.$transaction(async (tx) => {
+        const ownerUser = await tx.ownerUser.create({
             data: {
-                barberShopName,
                 email,
-                cpf: rawCpf,
-                cnpj: rawCnpj,
                 password: hashedPassword,
             },
         });
 
-        const barbershop = await prisma.barberShop.create({
+        const barberShop = await tx.barberShop.create({
             data: {
-                barbershopName: barberShopName, // 👈 nome certo do campo
-                phoneNumber: rawPhoneNumber,
-                slug,
+                barbershopName: barbershopName,
+                slug: slugBase + "-" + ownerUser.id + 'vb2304' + ownerUser.id,
+                phoneNumber: BigInt(rawPhoneNumber),
                 user: {
-                    connect: {
-                        id: ownerUser.id,
-                    },
+                    connect: { id: ownerUser.id },
                 },
             },
         });
 
         const daysOfWeek: WeekDay[] = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'];
 
-        await prisma.openingHour.createMany({
+        await tx.openingHour.createMany({
             data: daysOfWeek.map((day) => ({
-                barbershopId: barbershop.id,
+                barbershopId: barberShop.id,
                 day,
                 isOpen: false,
                 timeRanges: [],
             })),
         });
 
-        return barbershop;
+        return { ownerUser, barberShop };
     });
+
+    return result;
 };
 
 // export const loginService = async (data: AccountData) => {

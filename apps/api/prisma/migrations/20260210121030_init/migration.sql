@@ -13,8 +13,9 @@ CREATE TABLE "owner_users" (
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "cnpj" TEXT,
-    "cpf" TEXT NOT NULL,
+    "updatedAt" TIMESTAMP(3),
+    "cnpj" CHAR(14),
+    "cpf" CHAR(11),
     "refreshToken" TEXT,
 
     CONSTRAINT "owner_users_pkey" PRIMARY KEY ("id")
@@ -24,10 +25,10 @@ CREATE TABLE "owner_users" (
 CREATE TABLE "barber_users" (
     "id" SERIAL NOT NULL,
     "userName" TEXT NOT NULL,
-    "phoneNumber" TEXT NOT NULL,
+    "phoneNumber" BIGINT,
     "password" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "barberShopId" INTEGER,
+    "barberShopId" INTEGER NOT NULL,
 
     CONSTRAINT "barber_users_pkey" PRIMARY KEY ("id")
 );
@@ -36,7 +37,7 @@ CREATE TABLE "barber_users" (
 CREATE TABLE "customer_users" (
     "id" SERIAL NOT NULL,
     "userName" TEXT NOT NULL,
-    "phoneNumber" TEXT NOT NULL,
+    "phoneNumber" BIGINT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "barberShopId" INTEGER,
 
@@ -49,11 +50,13 @@ CREATE TABLE "barbershops" (
     "userId" INTEGER NOT NULL,
     "barbershopName" TEXT,
     "slug" TEXT NOT NULL,
-    "phoneNumber" TEXT,
+    "phoneNumber" BIGINT,
     "address" TEXT,
     "logoUrl" TEXT,
     "bannerUrl" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3),
 
     CONSTRAINT "barbershops_pkey" PRIMARY KEY ("id")
 );
@@ -113,6 +116,15 @@ CREATE TABLE "appointments" (
 CREATE UNIQUE INDEX "owner_users_email_key" ON "owner_users"("email");
 
 -- CreateIndex
+CREATE INDEX "owner_users_cpf_idx" ON "owner_users"("cpf");
+
+-- CreateIndex
+CREATE INDEX "owner_users_cnpj_idx" ON "owner_users"("cnpj");
+
+-- CreateIndex
+CREATE INDEX "owner_users_createdAt_idx" ON "owner_users"("createdAt");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "barber_users_userName_key" ON "barber_users"("userName");
 
 -- CreateIndex
@@ -122,10 +134,19 @@ CREATE UNIQUE INDEX "customer_users_phoneNumber_key" ON "customer_users"("phoneN
 CREATE UNIQUE INDEX "barbershops_userId_key" ON "barbershops"("userId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "barbershops_phoneNumber_key" ON "barbershops"("phoneNumber");
+
+-- CreateIndex
+CREATE INDEX "barbershops_isActive_idx" ON "barbershops"("isActive");
+
+-- CreateIndex
+CREATE INDEX "barbershops_createdAt_idx" ON "barbershops"("createdAt");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "password_reset_tokens_token_key" ON "password_reset_tokens"("token");
 
 -- AddForeignKey
-ALTER TABLE "barber_users" ADD CONSTRAINT "barber_users_barberShopId_fkey" FOREIGN KEY ("barberShopId") REFERENCES "barbershops"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "barber_users" ADD CONSTRAINT "barber_users_barberShopId_fkey" FOREIGN KEY ("barberShopId") REFERENCES "barbershops"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "customer_users" ADD CONSTRAINT "customer_users_barberShopId_fkey" FOREIGN KEY ("barberShopId") REFERENCES "barbershops"("id") ON DELETE SET NULL ON UPDATE CASCADE;

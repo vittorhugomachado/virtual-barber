@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { loginFieldsErrorChecker, signUpFieldsErrorChecker } from './utils/field-error-checker';
+import { signUpFieldsErrorChecker } from './utils/field-error-checker';
 import { handleControllerError } from '../../../utils/errors';
-import { signUpService, loginService, refreshTokenService, logoutService } from './auth.services';
+import { signUpService } from './auth.services';
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -11,11 +11,17 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        await signUpService(req.body);
+        const result = await signUpService(req.body);
 
-        res.status(201).json({ message: 'Usuário criado com sucesso' });
+        res.status(201).json({
+            message: 'Barbearia criada com sucesso',
+            data: {
+                slug: result.barberShop.slug,
+                barbershopName: result.barberShop.barbershopName,
+            },
+        });
         return;
-    } catch (error: any) {
+    } catch (error) {
         handleControllerError(res, error);
     }
 };
