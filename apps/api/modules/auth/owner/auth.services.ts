@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { WeekDay } from '@prisma/client';
 import { LoginData, SignUpData } from './types/auth-types';
 import { prisma } from '../../../lib/prisma';
-import { WeekDay } from '@prisma/client';
+import { generateTokens } from './utils/auth-generate-token';
 import { stripNonDigits } from '../../../utils/stripFormating';
 import { ConflictError, UnauthorizedError } from '../../../utils/errors';
-import { generateTokens } from './utils/auth-generate-token';
 
 export const signUpService = async (data: SignUpData) => {
     const { barbershopName, phoneNumber, email, password } = data;
