@@ -15,7 +15,7 @@ export const signUpService = async (data: SignUpData) => {
     const emailInUse = await prisma.ownerUser.findUnique({ where: { email } });
     if (emailInUse) throw new ConflictError('Email já cadastrado');
 
-    const phoneNumberInUse = await prisma.barberShop.findUnique({ where: { phoneNumber: BigInt(rawPhoneNumber) } });
+    const phoneNumberInUse = await prisma.barberShop.findUnique({ where: { phoneNumber: rawPhoneNumber } });
     if (phoneNumberInUse) throw new ConflictError('Celular já cadastrado');
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,7 +32,7 @@ export const signUpService = async (data: SignUpData) => {
             data: {
                 barbershopName: barbershopName,
                 slug: slugBase + '-' + ownerUser.id + 'vb2304' + ownerUser.id,
-                phoneNumber: BigInt(rawPhoneNumber),
+                phoneNumber: rawPhoneNumber,
                 user: {
                     connect: { id: ownerUser.id },
                 },

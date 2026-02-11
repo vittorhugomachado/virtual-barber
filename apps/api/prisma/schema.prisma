@@ -28,7 +28,7 @@ model OwnerUser {
 model BarberUser {
   id                  Int                  @id @default(autoincrement())
   userName            String               @unique
-  phoneNumber         BigInt?              @unique
+  phoneNumber         String?              @unique
   password            String
   createdAt           DateTime             @default(now())
   barberShop          BarberShop?          @relation(fields: [barberShopId], references: [id])
@@ -42,7 +42,7 @@ model BarberUser {
 model CustomerUser {
   id           Int           @id @default(autoincrement())
   userName     String
-  phoneNumber  BigInt        @unique
+  phoneNumber  String        @unique
   createdAt    DateTime      @default(now())
   appointments Appointment[]
   barberShop   BarberShop?   @relation(fields: [barberShopId], references: [id])
@@ -57,7 +57,7 @@ model BarberShop {
   user           OwnerUser @relation(fields: [userId], references: [id], onDelete: Cascade)
   barbershopName String?
   slug           String
-  phoneNumber    BigInt?   @unique
+  phoneNumber    String?   @unique
   address        String?
   logoUrl        String?
   bannerUrl      String?
