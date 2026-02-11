@@ -56,7 +56,7 @@ model BarberShop {
   userId         Int       @unique
   user           OwnerUser @relation(fields: [userId], references: [id], onDelete: Cascade)
   barbershopName String?
-  slug           String
+  slug           String    @unique
   phoneNumber    String?   @unique
   address        String?
   logoUrl        String?
