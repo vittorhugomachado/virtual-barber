@@ -117,3 +117,285 @@ paths:
                     description: Usuário não autenticado
                 '500':
                     description: Erro interno no servidor
+    /api/owner-user/recover-password:
+        post:
+            tags:
+                - Password Recovery
+            summary: Solicitar recuperação de senha
+            description: >
+                Envia um email com link para redefinição de senha. O link contém um token único que expira em 1 hora.
+                O email é enviado para o endereço cadastrado do usuário.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                    example: 'teste@barbearia.com.br'
+                                    description: Email cadastrado na conta
+                            required: [email]
+            responses:
+                '200':
+                    description: Link de recuperação enviado com sucesso
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: 'Um link de redefinição de senha foi enviado para seu email'
+                '400':
+                    description: Email não fornecido
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Email é obrigatório'
+                '404':
+                    description: Usuário não encontrado
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Usuário não encontrado'
+                '500':
+                    description: Erro interno no servidor
+
+    /api/owner-user/validate-token/{token}:
+        get:
+            tags:
+                - Password Recovery
+            summary: Validar token de recuperação
+            description: >
+                Valida se o token de recuperação de senha é válido e não expirou.
+                Esta rota é útil no frontend para renderizar o formulário de nova senha 
+                apenas se o token for válido, ou mostrar página de erro caso contrário.
+            parameters:
+                - in: path
+                  name: token
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                      example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+                  description: Token UUID recebido por email
+            responses:
+                '200':
+                    description: Token válido
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: 'Token válido'
+                '400':
+                    description: Token inválido (formato incorreto)
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Token inválido'
+                '404':
+                    description: Token não encontrado ou expirado
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Token inválido ou expirado'
+                '500':
+                    description: Erro interno no servidor
+
+    /api/owner-user/create-new-password/{token}:
+        patch:
+            tags:
+                - Password Recovery
+            summary: Redefinir senha
+            description: >
+                Redefine a senha do usuário usando o token válido recebido por email.
+                Após redefinir a senha, o token é invalidado e não pode ser reutilizado.
+            parameters:
+                - in: path
+                  name: token
+                  required: true
+                  schema:
+                      type: string
+                      format: uuid
+                      example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+                  description: Token UUID recebido por email
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                newPassword:
+                                    type: string
+                                    example: 'NovaSenha123'
+                                    description: >
+                                        Nova senha. Requisitos:
+                                        - Mínimo 8 caracteres
+                                        - Máximo 72 caracteres
+                                        - Pelo menos 1 letra maiúscula
+                                        - Pelo menos 1 número
+                            required: [newPassword]
+            responses:
+                '200':
+                    description: Senha redefinida com sucesso
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: 'Senha redefinida com sucesso'
+                '400':
+                    description: Dados inválidos
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Nova senha é obrigatória'
+                            examples:
+                                semSenha:
+                                    summary: Senha não fornecida
+                                    value:
+                                        success: false
+                                        message: 'Nova senha é obrigatória'
+                                tokenInvalido:
+                                    summary: Token com formato inválido
+                                    value:
+                                        success: false
+                                        message: 'Token inválido'
+                '404':
+                    description: Token não encontrado ou expirado
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Token inválido ou expirado'
+                '422':
+                    description: Erro de validação da senha
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    success:
+                                        type: boolean
+                                        example: false
+                                    message:
+                                        type: string
+                                        example: 'Senha fraca'
+                            examples:
+                                senhaFraca:
+                                    summary: Senha muito curta
+                                    value:
+                                        success: false
+                                        message: 'Senha fraca'
+                                senhaLonga:
+                                    summary: Senha muito longa
+                                    value:
+                                        success: false
+                                        message: 'Senha muito longa'
+                                semMaiuscula:
+                                    summary: Senha sem letra maiúscula
+                                    value:
+                                        success: false
+                                        message: 'Senha sem letra maiúscula'
+                                semNumero:
+                                    summary: Senha sem número
+                                    value:
+                                        success: false
+                                        message: 'Senha sem número'
+                '500':
+                    description: Erro interno no servidor
+
+components:
+    schemas:
+        PasswordRecoveryRequest:
+            type: object
+            properties:
+                email:
+                    type: string
+                    format: email
+                    example: 'teste@barbearia.com.br'
+            required:
+                - email
+
+        ResetPasswordRequest:
+            type: object
+            properties:
+                newPassword:
+                    type: string
+                    minLength: 8
+                    maxLength: 72
+                    example: 'NovaSenha123'
+                    description: Deve conter pelo menos 1 maiúscula e 1 número
+            required:
+                - newPassword
+
+        SuccessResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+
+        ErrorResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: false
+                message:
+                    type: string
+
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
