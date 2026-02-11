@@ -9,12 +9,10 @@ interface UserPayload {
     userId: number;
 }
 
-declare global {
-    namespace Express {
-        interface Request {
-            user?: UserPayload;
-        }
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: UserPayload;
+  }
 }
 
 export function authenticateToken(req: Request, res: Response, next: NextFunction): void {
