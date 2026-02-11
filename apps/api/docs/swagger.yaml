@@ -1,119 +1,119 @@
 openapi: 3.0.0
 info:
-  title: Virtual Barber API
-  version: 1.0.0
-  description: API REST para gestão de barbearias.
-  contact:
-    email: ovitorhugoalvesmachado@gmail.com.br
-  license:
-    name: Vitor Hugo Alves Machado
+    title: Virtual Barber API
+    version: 1.0.0
+    description: API REST para gestão de barbearias.
+    contact:
+        email: ovitorhugoalvesmachado@gmail.com.br
+    license:
+        name: Vitor Hugo Alves Machado
 
 tags:
-  - name: Auth Owner User
+    - name: Auth Owner User
 
 paths:
-  /api/owner-user/signup:
-    post:
-      tags:
-        - Auth Owner User
-      summary: Criar conta
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                barbershopName:
-                  type: string
-                  example: "Barbearia Teste"
-                phoneNumber: 
-                  type: string
-                  example: "(51) 98765-4321"
-                  description: Telefone com DDD
-                email:
-                  type: string
-                  format: email
-                  example: "teste@barbearia.com.br"
-                password:
-                  type: string
-                  example: senhaForte123!
-                  description: >
-                    A senha deve ter entre 8 e 72 caracteres, conter pelo menos uma letra maiúscula e um número.
-              required: [barbershopName, phoneNumber, email, password]
-      responses:
-        '201':
-          description: Usuário criado com sucesso
-        '409':
-          description: Email já cadastrado
-        '422':
-          description: Erro de validação de campos
-        '500':
-          description: Erro interno no servidor
+    /api/owner-user/signup:
+        post:
+            tags:
+                - Auth Owner User
+            summary: Criar conta
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                barbershopName:
+                                    type: string
+                                    example: 'Barbearia Teste'
+                                phoneNumber:
+                                    type: string
+                                    example: '(51) 98765-4321'
+                                    description: Telefone com DDD
+                                email:
+                                    type: string
+                                    format: email
+                                    example: 'teste@barbearia.com.br'
+                                password:
+                                    type: string
+                                    example: senhaForte123!
+                                    description: >
+                                        A senha deve ter entre 8 e 72 caracteres, conter pelo menos uma letra maiúscula e um número.
+                            required: [barbershopName, phoneNumber, email, password]
+            responses:
+                '201':
+                    description: Usuário criado com sucesso
+                '409':
+                    description: Email já cadastrado
+                '422':
+                    description: Erro de validação de campos
+                '500':
+                    description: Erro interno no servidor
 
-  /api/owner-user/login:
-    post:
-      tags:
-        - Auth Owner User
-      summary: Entrar na conta
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                  example: "teste@barbearia.com.br"
-                password:
-                  type: string
-                  example: senhaForte123!
-              required: [email, password]
-      responses:
-        '200':
-          description: Login realizado com sucesso
-          headers:
-            Set-Cookie:
-              description: Cookies de autenticação definidos (token e refreshToken)
-              schema:
-                type: string
-              example: token=abc123; Path=/; HttpOnly; Max-Age=900
-        '400':
-          description: Erro de validação de campos
-        '401':
-          description: Credenciais inválidas
-        '500':
-          description: Erro interno no servidor
+    /api/owner-user/login:
+        post:
+            tags:
+                - Auth Owner User
+            summary: Entrar na conta
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                    example: 'teste@barbearia.com.br'
+                                password:
+                                    type: string
+                                    example: senhaForte123!
+                            required: [email, password]
+            responses:
+                '200':
+                    description: Login realizado com sucesso
+                    headers:
+                        Set-Cookie:
+                            description: Cookies de autenticação definidos (token e refreshToken)
+                            schema:
+                                type: string
+                            example: token=abc123; Path=/; HttpOnly; Max-Age=900
+                '400':
+                    description: Erro de validação de campos
+                '401':
+                    description: Credenciais inválidas
+                '500':
+                    description: Erro interno no servidor
 
-  /api/owner-user/refresh-token:
-    post:
-      tags:
-        - Auth Owner User
-      summary: Atualizar token de acesso
-      description: >
-        Essa rota exige o cookie `refreshToken` presente na requisição. Ela retorna um novo access token no cookie `token`.
-      responses:
-        '200':
-          description: Token renovado com sucesso
-        '401':
-          description: Token de atualização ausente ou inválido
-        '500':
-          description: Erro interno no servidor
+    /api/owner-user/refresh-token:
+        post:
+            tags:
+                - Auth Owner User
+            summary: Atualizar token de acesso
+            description: >
+                Essa rota exige o cookie `refreshToken` presente na requisição. Ela retorna um novo access token no cookie `token`.
+            responses:
+                '200':
+                    description: Token renovado com sucesso
+                '401':
+                    description: Token de atualização ausente ou inválido
+                '500':
+                    description: Erro interno no servidor
 
-  /api/owner-user/logout:
-    post:
-      tags:
-        - Auth Owner User
-      summary: Sair da conta
-      security:
-        - bearerAuth: []
-      description: Requer um access token válido no cookie ou header para remover sessão.
-      responses:
-        '200':
-          description: Logout efetuado com sucesso
-        '401':
-          description: Usuário não autenticado
-        '500':
-          description: Erro interno no servidor
+    /api/owner-user/logout:
+        post:
+            tags:
+                - Auth Owner User
+            summary: Sair da conta
+            security:
+                - bearerAuth: []
+            description: Requer um access token válido no cookie ou header para remover sessão.
+            responses:
+                '200':
+                    description: Logout efetuado com sucesso
+                '401':
+                    description: Usuário não autenticado
+                '500':
+                    description: Erro interno no servidor

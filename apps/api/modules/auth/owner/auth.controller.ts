@@ -91,13 +91,11 @@ export const refreshAccessToken = async (req: Request, res: Response): Promise<v
 };
 
 export const logout = async (req: Request & { user?: { userId: number } }, res: Response): Promise<void> => {
-
     try {
-
         const userId = req.user?.userId;
         if (!userId) {
             res.status(401).json({ message: 'Usuário não autenticado' });
-            return
+            return;
         }
 
         await logoutService(userId);
@@ -105,11 +103,8 @@ export const logout = async (req: Request & { user?: { userId: number } }, res: 
         res.clearCookie('token');
         res.clearCookie('refreshToken');
         res.status(200).json({ message: 'Logout efetuado com sucesso' });
-        return
-
+        return;
     } catch (error) {
-
         handleControllerError(res, error);
-
     }
 };
