@@ -1,6 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import ownerUserauthRoutes from './modules/auth/owner/auth.routes';
+import ownerPasswordRoutes from './modules/password/owner/password.routes';
 import YAML from 'yamljs';
 import path from 'path';
 import swaggerUi from 'swagger-ui-express';
@@ -12,6 +13,7 @@ const swaggerDocument = YAML.load(path.resolve(__dirname, '../../docs/swagger.ya
 const port = 3000;
 
 app.use('/api/owner-user', ownerUserauthRoutes);
+app.use('/api/owner-user', ownerPasswordRoutes);
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(port, () => {

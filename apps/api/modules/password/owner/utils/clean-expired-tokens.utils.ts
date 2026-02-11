@@ -1,4 +1,4 @@
-import { prisma } from '../../../lib/prisma';
+import { prisma } from '../../../../lib/prisma';
 import cron from 'node-cron';
 
 cron.schedule('0 * * * *', async () => {
