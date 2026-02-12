@@ -8,14 +8,15 @@ datasource db {
 }
 
 model OwnerUser {
-  id                  Int                  @id @default(autoincrement())
-  email               String               @unique
-  password            String
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime?            @updatedAt
-  cnpj                String?              @db.Char(14)
-  cpf                 String?              @db.Char(11)
-  refreshToken        String?
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  password     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime? @updatedAt
+  cnpj         String?  @db.Char(14)
+  cpf          String?  @db.Char(11)
+  refreshToken String?
+
   barberShop          BarberShop?
   passwordResetTokens PasswordResetToken[]
 
@@ -26,13 +27,14 @@ model OwnerUser {
 }
 
 model BarberUser {
-  id                  Int                  @id @default(autoincrement())
-  userName            String               @unique
-  phoneNumber         String?              @unique
-  password            String
-  createdAt           DateTime             @default(now())
-  barberShop          BarberShop?          @relation(fields: [barberShopId], references: [id])
-  barberShopId        Int
+  id          Int      @id @default(autoincrement())
+  userName    String   @unique
+  phoneNumber String?  @unique
+  password    String
+  createdAt   DateTime @default(now())
+  barberShopId Int
+
+  barberShop          BarberShop?      @relation(fields: [barberShopId], references: [id])
   appointments        Appointment[]
   passwordResetTokens PasswordResetToken[]
 
@@ -40,36 +42,37 @@ model BarberUser {
 }
 
 model CustomerUser {
-  id           Int           @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   userName     String
-  phoneNumber  String        @unique
-  createdAt    DateTime      @default(now())
-  appointments Appointment[]
-  barberShop   BarberShop?   @relation(fields: [barberShopId], references: [id])
+  phoneNumber  String   @unique
+  createdAt    DateTime @default(now())
   barberShopId Int?
+
+  appointments Appointment[]
+  barberShop   BarberShop? @relation(fields: [barberShopId], references: [id])
 
   @@map("customer_users")
 }
 
 model BarberShop {
-  id             Int       @id @default(autoincrement())
-  userId         Int       @unique
-  user           OwnerUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             Int      @id @default(autoincrement())
+  userId         Int      @unique
   barbershopName String?
-  slug           String    @unique
-  phoneNumber    String?   @unique
-  address        String?
+  slug           String   @unique
+  phoneNumber    String?  @unique
   logoUrl        String?
   bannerUrl      String?
-  isActive       Boolean   @default(true)
-  createdAt      DateTime  @default(now())
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
   updatedAt      DateTime? @updatedAt
 
-  services      Service[]
-  openingHours  OpeningHour[]
-  appointments  Appointment[]
-  customerUsers CustomerUser[]
-  barberUsers   BarberUser[]
+  user           OwnerUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address        Address?
+  services       Service[]
+  openingHours   OpeningHour[]
+  appointments   Appointment[]
+  customerUsers  CustomerUser[]
+  barberUsers    BarberUser[]
 
   @@index([isActive])
   @@index([createdAt])
@@ -78,26 +81,48 @@ model BarberShop {
 
 model OpeningHour {
   barbershopId Int
-  barbershop   BarberShop @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
   day          WeekDay
-  isOpen       Boolean    @default(false)
+  isOpen       Boolean @default(false)
   timeRanges   Json?
+
+  barbershop BarberShop @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
 
   @@id([barbershopId, day])
   @@map("opening_hours")
 }
 
+model Address {
+  id           Int     @id @default(autoincrement())
+  street       String
+  number       String
+  complement   String?
+  neighborhood String
+  city         String
+  state        BrazilianState
+  zipCode      String  @db.Char(8)
+  latitude     Float?
+  longitude    Float?
+  barberShopId Int?    @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime? @updatedAt
+
+  barberShop BarberShop? @relation(fields: [barberShopId], references: [id])
+
+  @@map("addresses")
+}
+
 model PasswordResetToken {
-  id        Int         @id @default(autoincrement())
-  token     String      @unique
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
   userType  UserType
   ownerId   Int?
-  owner     OwnerUser?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   barberId  Int?
-  barber    BarberUser? @relation(fields: [barberId], references: [id], onDelete: Cascade)
   expiresAt DateTime
-  createdAt DateTime    @default(now())
+  createdAt DateTime @default(now())
   usedAt    DateTime?
+
+  owner  OwnerUser?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  barber BarberUser? @relation(fields: [barberId], references: [id], onDelete: Cascade)
 
   @@index([token])
   @@index([expiresAt])
@@ -105,34 +130,36 @@ model PasswordResetToken {
 }
 
 model Service {
-  id           Int           @id @default(autoincrement())
-  name         String        @db.VarChar(100)
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(100)
   image        String?
-  barbershopId Int
-  barbershop   BarberShop    @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
   description  String?
   duration     Int
+  barbershopId Int
+  createdAt    DateTime @default(now())
+  isActive     Boolean  @default(true)
+
+  barbershop   BarberShop    @relation(fields: [barbershopId], references: [id], onDelete: Cascade)
   appointments Appointment[]
-  createdAt    DateTime      @default(now())
-  isActive     Boolean       @default(true)
 
   @@map("services")
 }
 
 model Appointment {
   id             Int               @id @default(autoincrement())
-  barberShop     BarberShop        @relation(fields: [barberShopId], references: [id], map: "fk_appointment_barbershop")
   barberShopId   Int
   customerUserId Int
-  customerUser   CustomerUser      @relation(fields: [customerUserId], references: [id])
   serviceId      Int
-  service        Service           @relation(fields: [serviceId], references: [id])
   notes          String?
-  barberUser     BarberUser?       @relation(fields: [barberUserId], references: [id])
   barberUserId   Int?
   status         AppointmentStatus @default(agendado)
   date           DateTime
   createdAt      DateTime          @default(now())
+
+  barberShop   BarberShop   @relation(fields: [barberShopId], references: [id], map: "fk_appointment_barbershop")
+  customerUser CustomerUser @relation(fields: [customerUserId], references: [id])
+  service      Service      @relation(fields: [serviceId], references: [id])
+  barberUser   BarberUser?  @relation(fields: [barberUserId], references: [id])
 
   @@map("appointments")
 }
@@ -140,6 +167,36 @@ model Appointment {
 enum UserType {
   owner
   barber
+}
+
+enum BrazilianState {
+  Acre
+  Alagoas
+  Amapá
+  Amazonas
+  Bahia
+  Ceará
+  Distrito_Federal
+  Espírito_Santo
+  Goiás
+  Maranhão
+  Mato_Grosso
+  Mato_Grosso_do_Sul
+  Minas_Gerais
+  Pará
+  Paraíba
+  Paraná
+  Pernambuco
+  Piauí
+  Rio_de_Janeiro
+  Rio_Grande_do_Norte
+  Rio_Grande_do_Sul
+  Rondônia
+  Roraima
+  Santa_Catarina
+  São_Paulo
+  Sergipe
+  Tocantins
 }
 
 enum WeekDay {
