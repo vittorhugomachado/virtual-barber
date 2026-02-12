@@ -1,4 +1,4 @@
-import { BrazilianState } from "../../../../generated/prisma/client";
+import { BrazilianState } from '../../../../generated/prisma/client';
 
 export interface UserProfileData {
     id: number;

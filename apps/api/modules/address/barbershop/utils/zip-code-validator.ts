@@ -1,5 +1,4 @@
 export const isValidZipCode = (zipCode: string): boolean => {
-
     const cleaned = zipCode.replace(/\D/g, '');
 
     if (cleaned.length !== 8) {
@@ -9,6 +8,6 @@ export const isValidZipCode = (zipCode: string): boolean => {
     if (/^(\d)\1{7}$/.test(cleaned)) {
         return false;
     }
-    
+
     return true;
 };

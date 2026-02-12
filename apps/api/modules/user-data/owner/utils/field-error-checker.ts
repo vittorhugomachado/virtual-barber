@@ -1,4 +1,4 @@
-import { stripNonDigits } from "../../../../utils/stripFormating";
+import { stripNonDigits } from '../../../../utils/stripFormating';
 
 export const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -7,7 +7,7 @@ export const isValidEmail = (email: string): boolean => {
 
 export const isValidPhone = (phone: string): boolean => {
     const cleanPhone = phone.replace(/\D/g, '');
-    
+
     return cleanPhone.length === 10 || cleanPhone.length === 11;
 };
 
@@ -27,4 +27,4 @@ export const isValidBarbershopName = (name: string): boolean => {
 
 export const isValidSlug = (slug: string): boolean => {
     return slug.trim().length >= 3 && slug.trim().length <= 100;
-}
+};

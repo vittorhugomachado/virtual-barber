@@ -6,9 +6,9 @@ cron.schedule('0 * * * *', async () => {
         const result = await prisma.passwordResetToken.deleteMany({
             where: {
                 expiresAt: {
-                    lt: new Date()
-                }
-            }
+                    lt: new Date(),
+                },
+            },
         });
 
         console.log(`[CRON] Tokens expirados removidos: ${result.count}`);

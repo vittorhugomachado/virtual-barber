@@ -6,19 +6,18 @@ import { NotFoundError, ValidationError } from '../../../utils/errors';
 import { UserType } from '../../../generated/prisma/enums';
 
 export const generateResetTokenService = async (email: string) => {
-
-    const ownerUser = await prisma.ownerUser.findUnique({ 
+    const ownerUser = await prisma.ownerUser.findUnique({
         where: { email },
-        include: { barberShop: true }
+        include: { barberShop: true },
     });
-    
+
     if (!ownerUser) throw new NotFoundError('Usuário não encontrado');
 
-    await prisma.passwordResetToken.deleteMany({ 
-        where: { 
+    await prisma.passwordResetToken.deleteMany({
+        where: {
             ownerId: ownerUser.id,
-            userType: UserType.owner
-        } 
+            userType: UserType.owner,
+        },
     });
 
     const token = randomUUID();
@@ -30,15 +29,14 @@ export const generateResetTokenService = async (email: string) => {
             ownerId: ownerUser.id,
             userType: UserType.owner,
             expiresAt,
-            createdAt: new Date(Date.now())
-        }
+            createdAt: new Date(Date.now()),
+        },
     });
 
     return { token, ownerId: ownerUser.id, barberShop: ownerUser.barberShop };
 };
 
 export const passwordResetEmailService = async (email: string, token: string, barbershopName?: string) => {
-
     const resetLink = `http://localhost:5173/create-new-password/${token}`;
 
     await transporter.sendMail({
@@ -55,26 +53,24 @@ export const passwordResetEmailService = async (email: string, token: string, ba
             <br>
             <p>Atenciosamente,</p>
             <p><strong>Equipe BarberShop System</strong></p>
-            `
+            `,
     });
 };
 
 export const validateTokenService = async (token: string) => {
-
-    const tokenData = await prisma.passwordResetToken.findFirst({ 
-        where: { token } 
+    const tokenData = await prisma.passwordResetToken.findFirst({
+        where: { token },
     });
-    
+
     if (!tokenData || tokenData.expiresAt < new Date()) {
         throw new NotFoundError('Token inválido ou expirado');
     }
 };
 
 export const resetPasswordService = async (token: string, newPassword: string) => {
-    
     const tokenRecord = await prisma.passwordResetToken.findUnique({
         where: { token },
-        include: { owner: true }
+        include: { owner: true },
     });
 
     if (!tokenRecord || tokenRecord.expiresAt < new Date()) {
@@ -90,7 +86,7 @@ export const resetPasswordService = async (token: string, newPassword: string) =
 
     await prisma.ownerUser.update({
         where: { id: tokenRecord.ownerId! },
-        data: { password: hashedPassword }
+        data: { password: hashedPassword },
     });
 
     await prisma.passwordResetToken.delete({ where: { token } });
