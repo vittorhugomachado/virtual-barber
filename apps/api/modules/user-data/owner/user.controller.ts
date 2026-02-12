@@ -26,7 +26,7 @@ export const updateUserData = async (req: Request, res: Response): Promise<void>
         const userId = Number(req.user?.userId);
         const updateData = req.body;
 
-        const allowedFields = ['barbershopName', 'phoneNumber', 'email', 'cnpj', 'cpf', 'slug', 'address'];
+        const allowedFields = ['barbershopName', 'phoneNumber', 'email', 'cnpj', 'cpf', 'slug'];
         
         const isValidUpdate = Object.keys(updateData).every(key => allowedFields.includes(key));
         if (!isValidUpdate) {

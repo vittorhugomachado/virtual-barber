@@ -28,8 +28,3 @@ export const isValidBarbershopName = (name: string): boolean => {
 export const isValidSlug = (slug: string): boolean => {
     return slug.trim().length >= 3 && slug.trim().length <= 100;
 }
-
-
-export const isValidAddress = (address: string): boolean => {
-    return address.trim().length >= 10 && address.trim().length <= 200;
-};

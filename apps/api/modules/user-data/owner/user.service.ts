@@ -100,10 +100,6 @@ export const userDataUpdateService = async (userId: number, updateData: UpdateUs
         barberShopData.phoneNumber = updateData.phoneNumber;
     }
 
-    if (updateData.address !== undefined && updateData.address !== null) {
-        barberShopData.address = updateData.address;
-    }
-
     await prisma.$transaction(async (tx) => {
         if (Object.keys(ownerData).length > 0) {
             await tx.ownerUser.update({

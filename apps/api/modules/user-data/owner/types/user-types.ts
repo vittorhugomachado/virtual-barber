@@ -1,3 +1,5 @@
+import { BrazilianState } from "../../../../generated/prisma/client";
+
 export interface UserProfileData {
     id: number;
     email: string;
@@ -6,7 +8,20 @@ export interface UserProfileData {
     barberShop: {
         barbershopName: string | null;
         phoneNumber: string | null;
-        address: string | null;
+        address: {
+            id: number;
+            street: string;
+            number: string;
+            complement: string | null;
+            neighborhood: string;
+            city: string;
+            state: BrazilianState;
+            zipCode: string;
+            latitude: number | null;
+            longitude: number | null;
+            createdAt: Date;
+            updatedAt: Date | null;
+        } | null;
         logoUrl: string | null;
         bannerUrl: string | null;
         slug: string;
