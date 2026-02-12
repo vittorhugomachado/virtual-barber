@@ -317,114 +317,114 @@ paths:
                 '500':
                     description: Erro interno no servidor
 
-/api/barbershop/address:
-    get:
-        tags:
-            - Barbershop Address
-        summary: Obter endereço da barbearia
-        description: >
-            Retorna o endereço completo da barbearia associada ao usuário owner autenticado.
-            Se não houver endereço cadastrado, retorna null.
-            Requer autenticação via JWT token.
-        security:
-            - bearerAuth: []
-        responses:
-            '200':
-                description: Endereço retornado com sucesso
-            '401':
-                description: Não autenticado
-            '404':
-                description: Usuário ou barbearia não encontrada
-            '500':
-                description: Erro interno no servidor
+    /api/barbershop/address:
+        get:
+            tags:
+                - Barbershop Address
+            summary: Obter endereço da barbearia
+            description: >
+                Retorna o endereço completo da barbearia associada ao usuário owner autenticado.
+                Se não houver endereço cadastrado, retorna null.
+                Requer autenticação via JWT token.
+            security:
+                - bearerAuth: []
+            responses:
+                '200':
+                    description: Endereço retornado com sucesso
+                '401':
+                    description: Não autenticado
+                '404':
+                    description: Usuário ou barbearia não encontrada
+                '500':
+                    description: Erro interno no servidor
 
-    patch:
-        tags:
-            - Barbershop Address
-        summary: Atualizar ou criar endereço da barbearia
-        description: >
-            Atualiza o endereço existente da barbearia ou cria um novo endereço se não existir.
+        patch:
+            tags:
+                - Barbershop Address
+            summary: Atualizar ou criar endereço da barbearia
+            description: >
+                Atualiza o endereço existente da barbearia ou cria um novo endereço se não existir.
 
-            **Comportamento:**
-            - Se a barbearia já possui endereço: atualiza apenas os campos enviados
-            - Se a barbearia não possui endereço: cria um novo (todos os campos obrigatórios devem ser enviados)
+                **Comportamento:**
+                - Se a barbearia já possui endereço: atualiza apenas os campos enviados
+                - Se a barbearia não possui endereço: cria um novo (todos os campos obrigatórios devem ser enviados)
 
-            **Validações:**
-            - CEP deve ter 8 dígitos (formatação é removida automaticamente)
-            - Latitude deve estar entre -90 e 90
-            - Longitude deve estar entre -180 e 180
-            - Campos de texto não podem ser strings vazias
+                **Validações:**
+                - CEP deve ter 8 dígitos (formatação é removida automaticamente)
+                - Latitude deve estar entre -90 e 90
+                - Longitude deve estar entre -180 e 180
+                - Campos de texto não podem ser strings vazias
 
-            Requer autenticação via JWT token.
-        security:
-            - bearerAuth: []
-        requestBody:
-            required: true
-            content:
-                application/json:
-                    schema:
-                        $ref: '#/components/schemas/UpdateAddressRequest'
-                    examples:
-                        atualizacao_parcial:
-                            summary: Atualização parcial (só rua e número)
-                            value:
-                                street: 'Av. Ipiranga'
-                                number: '5555'
-                        atualizacao_completa:
-                            summary: Atualização completa
-                            value:
-                                street: 'Av. Ipiranga'
-                                number: '5555'
-                                complement: 'Loja 2'
-                                neighborhood: 'Azenha'
-                                city: 'Porto Alegre'
-                                state: 'Rio_Grande_do_Sul'
-                                zipCode: '90160093'
-                                latitude: -30.0502
-                                longitude: -51.2084
-                        criar_novo:
-                            summary: Criação de endereço (todos os campos obrigatórios)
-                            value:
-                                street: 'Rua dos Andradas'
-                                number: '1001'
-                                neighborhood: 'Centro Histórico'
-                                city: 'Porto Alegre'
-                                state: 'Rio_Grande_do_Sul'
-                                zipCode: '90020000'
-                        remover_complemento:
-                            summary: Remover complemento (enviar null)
-                            value:
-                                complement: null
-        responses:
-            '200':
-                description: Endereço atualizado ou criado com sucesso
-            '400':
-                description: Dados inválidos (campos não permitidos, validações falharam)
-            '401':
-                description: Não autenticado
-            '404':
-                description: Usuário ou barbearia não encontrada
-            '500':
-                description: Erro interno no servidor
+                Requer autenticação via JWT token.
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateAddressRequest'
+                        examples:
+                            atualizacao_parcial:
+                                summary: Atualização parcial (só rua e número)
+                                value:
+                                    street: 'Av. Ipiranga'
+                                    number: '5555'
+                            atualizacao_completa:
+                                summary: Atualização completa
+                                value:
+                                    street: 'Av. Ipiranga'
+                                    number: '5555'
+                                    complement: 'Loja 2'
+                                    neighborhood: 'Azenha'
+                                    city: 'Porto Alegre'
+                                    state: 'Rio_Grande_do_Sul'
+                                    zipCode: '90160093'
+                                    latitude: -30.0502
+                                    longitude: -51.2084
+                            criar_novo:
+                                summary: Criação de endereço (todos os campos obrigatórios)
+                                value:
+                                    street: 'Rua dos Andradas'
+                                    number: '1001'
+                                    neighborhood: 'Centro Histórico'
+                                    city: 'Porto Alegre'
+                                    state: 'Rio_Grande_do_Sul'
+                                    zipCode: '90020000'
+                            remover_complemento:
+                                summary: Remover complemento (enviar null)
+                                value:
+                                    complement: null
+            responses:
+                '200':
+                    description: Endereço atualizado ou criado com sucesso
+                '400':
+                    description: Dados inválidos (campos não permitidos, validações falharam)
+                '401':
+                    description: Não autenticado
+                '404':
+                    description: Usuário ou barbearia não encontrada
+                '500':
+                    description: Erro interno no servidor
 
-    delete:
-        tags:
-            - Barbershop Address
-        summary: Deletar endereço da barbearia
-        description: >
-            Deleta permanentemente o endereço da barbearia associada ao usuário owner autenticado.
+        delete:
+            tags:
+                - Barbershop Address
+            summary: Deletar endereço da barbearia
+            description: >
+                Deleta permanentemente o endereço da barbearia associada ao usuário owner autenticado.
 
-            ⚠️ **ATENÇÃO:** Esta operação é irreversível!
+                ⚠️ **ATENÇÃO:** Esta operação é irreversível!
 
-            Requer autenticação via JWT token.
-        security:
-            - bearerAuth: []
-        responses:
-            '200':
-                description: Endereço deletado com sucesso
-            '401':
-                description: Não autenticado
-            '404':
-                description: Usuário, barbearia ou endereço não encontrado
-            '500':
-                description: Erro interno no servidor
+                Requer autenticação via JWT token.
+            security:
+                - bearerAuth: []
+            responses:
+                '200':
+                    description: Endereço deletado com sucesso
+                '401':
+                    description: Não autenticado
+                '404':
+                    description: Usuário, barbearia ou endereço não encontrado
+                '500':
+                    description: Erro interno no servidor
