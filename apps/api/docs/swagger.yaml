@@ -10,6 +10,8 @@ info:
 
 tags:
     - name: Auth Owner User
+    - name: Password Recovery
+    - name: Owner User Data
 
 paths:
     /api/owner-user/signup:
@@ -141,40 +143,10 @@ paths:
             responses:
                 '200':
                     description: Link de recuperação enviado com sucesso
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    message:
-                                        type: string
-                                        example: 'Um link de redefinição de senha foi enviado para seu email'
                 '400':
                     description: Email não fornecido
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    success:
-                                        type: boolean
-                                        example: false
-                                    message:
-                                        type: string
-                                        example: 'Email é obrigatório'
                 '404':
                     description: Usuário não encontrado
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    success:
-                                        type: boolean
-                                        example: false
-                                    message:
-                                        type: string
-                                        example: 'Usuário não encontrado'
                 '500':
                     description: Erro interno no servidor
 
@@ -199,40 +171,10 @@ paths:
             responses:
                 '200':
                     description: Token válido
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    message:
-                                        type: string
-                                        example: 'Token válido'
                 '400':
                     description: Token inválido (formato incorreto)
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    success:
-                                        type: boolean
-                                        example: false
-                                    message:
-                                        type: string
-                                        example: 'Token inválido'
                 '404':
                     description: Token não encontrado ou expirado
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    success:
-                                        type: boolean
-                                        example: false
-                                    message:
-                                        type: string
-                                        example: 'Token inválido ou expirado'
                 '500':
                     description: Erro interno no servidor
 
@@ -273,84 +215,103 @@ paths:
             responses:
                 '200':
                     description: Senha redefinida com sucesso
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    message:
-                                        type: string
-                                        example: 'Senha redefinida com sucesso'
                 '400':
                     description: Dados inválidos
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    success:
-                                        type: boolean
-                                        example: false
-                                    message:
-                                        type: string
-                                        example: 'Nova senha é obrigatória'
-                            examples:
-                                semSenha:
-                                    summary: Senha não fornecida
-                                    value:
-                                        success: false
-                                        message: 'Nova senha é obrigatória'
-                                tokenInvalido:
-                                    summary: Token com formato inválido
-                                    value:
-                                        success: false
-                                        message: 'Token inválido'
                 '404':
                     description: Token não encontrado ou expirado
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    success:
-                                        type: boolean
-                                        example: false
-                                    message:
-                                        type: string
-                                        example: 'Token inválido ou expirado'
                 '422':
                     description: Erro de validação da senha
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    success:
-                                        type: boolean
-                                        example: false
-                                    message:
-                                        type: string
-                                        example: 'Senha fraca'
-                            examples:
-                                senhaFraca:
-                                    summary: Senha muito curta
-                                    value:
-                                        success: false
-                                        message: 'Senha fraca'
-                                senhaLonga:
-                                    summary: Senha muito longa
-                                    value:
-                                        success: false
-                                        message: 'Senha muito longa'
-                                semMaiuscula:
-                                    summary: Senha sem letra maiúscula
-                                    value:
-                                        success: false
-                                        message: 'Senha sem letra maiúscula'
-                                semNumero:
-                                    summary: Senha sem número
-                                    value:
-                                        success: false
-                                        message: 'Senha sem número'
+                '500':
+                    description: Erro interno no servidor
+
+    /api/owner-user/user:
+        get:
+            tags:
+                - Owner User Data
+            summary: Obter dados do usuário
+            description: >
+                Retorna todos os dados do usuário owner autenticado e sua barbearia associada.
+                Requer autenticação via JWT token.
+            security:
+                - bearerAuth: []
+            responses:
+                '200':
+                    description: Dados retornados com sucesso
+                '401':
+                    description: Não autenticado
+                '404':
+                    description: Usuário não encontrado
+                '500':
+                    description: Erro interno no servidor
+
+        patch:
+            tags:
+                - Owner User Data
+            summary: Atualizar dados do usuário
+            description: >
+                Atualiza os dados do usuário owner e/ou sua barbearia.
+                Todos os campos são opcionais - envie apenas os que deseja atualizar.
+                Requer autenticação via JWT token.
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateUserRequest'
+                        examples:
+                            completo:
+                                summary: Atualização completa
+                                value:
+                                    email: 'novoemail@barbearia.com.br'
+                                    barbershopName: 'Barbearia Premium'
+                                    phoneNumber: 51988776655
+                                    address: 'Av. Principal, 456'
+                                    cnpj: '98765432109876'
+                                    cpf: '98765432109'
+                                    logoUrl: 'https://example.com/new-logo.png'
+                                    bannerUrl: 'https://example.com/new-banner.jpg'
+                            parcial:
+                                summary: Atualização parcial (só nome e telefone)
+                                value:
+                                    barbershopName: 'Novo Nome da Barbearia'
+                                    phoneNumber: 51999998888
+            responses:
+                '200':
+                    description: Dados atualizados com sucesso
+                '400':
+                    description: Dados inválidos
+                '401':
+                    description: Não autenticadoirado'
+                '404':
+                    description: Usuário ou barbearia não encontrada
+                '500':
+                    description: Erro interno no servidor
+
+        delete:
+            tags:
+                - Owner User Data
+            summary: Deletar conta do usuário
+            description: >
+                ⚠️ ATENÇÃO: Esta operação é IRREVERSÍVEL!
+                
+                Deleta permanentemente:
+                - O usuário owner
+                - A barbearia associada (cascade)
+                - Todos os serviços da barbearia
+                - Todos os agendamentos
+                - Todos os dados relacionados
+                
+                Requer autenticação via JWT token.
+            security:
+                - bearerAuth: []
+            responses:
+                '200':
+                    description: Usuário deletado com sucesso
+                '401':
+                    description: Não autenticado
+                '404':
+                    description: Usuário não encontrado
                 '500':
                     description: Erro interno no servidor
